@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2020 Adevinta
+# Copyright 2021 Adevinta
 
 export PORT=${PORT:-8080}
 export PATH_STYLE=${PATH_STYLE:-false}
