@@ -8,8 +8,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/manelmontilla/cron"
+	"github.com/sirupsen/logrus"
 )
 
 const (

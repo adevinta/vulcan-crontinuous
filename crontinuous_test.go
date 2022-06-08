@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/manelmontilla/cron"
+	"github.com/sirupsen/logrus"
 )
 
 var (
