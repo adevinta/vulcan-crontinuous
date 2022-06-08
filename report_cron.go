@@ -5,8 +5,8 @@ Copyright 2020 Adevinta
 package crontinuous
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/manelmontilla/cron"
+	"github.com/sirupsen/logrus"
 )
 
 const (
