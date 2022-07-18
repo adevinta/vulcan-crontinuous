@@ -1,6 +1,6 @@
 # Copyright 2020 Adevinta
 
-FROM golang:1.18.3-alpine3.15 AS builder
+FROM golang:1.18.4-alpine3.15 AS builder
 
 WORKDIR /app
 
