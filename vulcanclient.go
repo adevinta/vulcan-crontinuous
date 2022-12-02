@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -33,6 +34,8 @@ type VulcanClient struct {
 	VulcanAPI   string
 	VulcanUser  string
 	VulcanToken string
+
+	Log *logrus.Logger
 }
 
 // CreateScan creates a scan by calling vulcan-api
@@ -44,8 +47,14 @@ func (c *VulcanClient) CreateScan(scanID, teamID string) error {
 	}
 
 	url := fmt.Sprintf(createScanURL, c.VulcanAPI, teamID)
+	retries := 0
 	operation := func() error {
-		return c.performReq(http.MethodPost, url, scanMsg)
+		err := c.performReq(http.MethodPost, url, scanMsg)
+		if err != nil {
+			c.Log.WithError(err).WithField("job", teamID).Errorf("unable to create scan, retry: %d", retries)
+		}
+		retries += 1
+		return err
 	}
 
 	return backoff.Retry(operation, backoff.NewExponentialBackOff())
@@ -54,8 +63,14 @@ func (c *VulcanClient) CreateScan(scanID, teamID string) error {
 // SendReport triggers a report sending operation by calling vulcan-api.
 func (c *VulcanClient) SendReport(teamID string) error {
 	url := fmt.Sprintf(sendReportURL, c.VulcanAPI, teamID)
+	retries := 0
 	operation := func() error {
-		return c.performReq(http.MethodPost, url, nil)
+		err := c.performReq(http.MethodPost, url, nil)
+		if err != nil {
+			c.Log.WithError(err).WithField("job", teamID).Errorf("unable to send report, retry: %d", retries)
+		}
+		retries += 1
+		return err
 	}
 
 	return backoff.Retry(operation, backoff.NewExponentialBackOff())

@@ -113,6 +113,7 @@ type config struct {
 }
 
 func runServer(c config) error {
+	logger := logrus.New()
 	sess, err := session.NewSession(&aws.Config{Region: &c.Region})
 	if err != nil {
 		log.Fatal(err)
@@ -127,6 +128,7 @@ func runServer(c config) error {
 		VulcanAPI:   c.VulcanAPI,
 		VulcanToken: c.VulcanToken,
 		VulcanUser:  c.VulcanUser,
+		Log:         logger,
 	}
 
 	s3Store := crontinuous.NewS3CronStore(c.Bucket,
@@ -141,7 +143,7 @@ func runServer(c config) error {
 			EnableTeamsWhitelistReport: c.EnableTeamsWhitelistReport,
 			TeamsWhitelistReport:       c.TeamsWhitelistReport,
 		},
-		logrus.New(),
+		logger,
 		vulcanc, s3Store,
 		vulcanc, s3Store,
 	)

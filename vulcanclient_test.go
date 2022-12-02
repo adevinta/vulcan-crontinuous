@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -73,6 +74,7 @@ func TestVulcanClient_CreateScan(t *testing.T) {
 				VulcanAPI:   s.URL,
 				VulcanUser:  tt.fields.VulcanUser,
 				VulcanToken: tt.fields.VulcanToken,
+				Log:         logrus.New(),
 			}
 			err := c.CreateScan(tt.programID, tt.teamID)
 			if (err != nil) != tt.wantErr {
@@ -190,6 +192,7 @@ func TestVulcanClient_TestBackoff(t *testing.T) {
 				VulcanAPI:   s.URL,
 				VulcanUser:  tt.fields.VulcanUser,
 				VulcanToken: tt.fields.VulcanToken,
+				Log:         logrus.New(),
 			}
 			err := c.SendReport(tt.teamID)
 			if (err != nil) != tt.wantErr {
