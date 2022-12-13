@@ -6,6 +6,10 @@ package crontinuous
 
 import (
 	"errors"
+	"fmt"
+	"math/rand"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/manelmontilla/cron"
@@ -43,6 +47,9 @@ type Config struct {
 	TeamsWhitelistScan         []string
 	EnableTeamsWhitelistReport bool
 	TeamsWhitelistReport       []string
+
+	RandomizeGlobalProgramCronMinute bool
+	RandomizeCronMinuteInterval      int
 }
 
 type CronType int
@@ -87,6 +94,10 @@ func NewCrontinuous(cfg Config, logger *logrus.Logger,
 	scanCreator ScanCreator, scanCronStore ScanCronStore,
 	reportSender ReportSender, reportCronStore ReportCronStore) *Crontinuous {
 
+	if cfg.RandomizeGlobalProgramCronMinute &&
+		(cfg.RandomizeCronMinuteInterval == 0 || cfg.RandomizeCronMinuteInterval > 59) {
+		cfg.RandomizeCronMinuteInterval = 59
+	}
 	return &Crontinuous{
 		config:          cfg,
 		log:             logger,
@@ -130,6 +141,22 @@ func (c *Crontinuous) Start() error {
 	return nil
 }
 
+func isGlobalProgram(programID string) bool {
+	if strings.HasSuffix(programID, "@web-scanning") {
+		return true
+	}
+	if strings.HasSuffix(programID, "@redcon-scan") {
+		return true
+	}
+	if strings.HasSuffix(programID, "@periodic-full-scan") {
+		return true
+	}
+	if strings.HasSuffix(programID, "@cp-scan") {
+		return true
+	}
+	return false
+}
+
 func (c *Crontinuous) buildScanEntries() (map[string]ScanEntry, []cronJobSchedule, error) {
 	scanEntries, err := c.scanCronStore.GetScanEntries()
 	if err != nil {
@@ -143,7 +170,19 @@ func (c *Crontinuous) buildScanEntries() (map[string]ScanEntry, []cronJobSchedul
 			// but do not build job to be scheduled.
 			continue
 		}
-		s, err := cron.ParseStandard(se.CronSpec)
+		cronSpec := se.CronSpec
+		if c.config.RandomizeGlobalProgramCronMinute && isGlobalProgram(se.ProgramID) {
+			cs := strings.Split(cronSpec, " ")
+			// Ensure that the first entry of the cron string is an integer.
+			if _, err := strconv.Atoi(cs[0]); err == nil {
+				cs[0] = fmt.Sprintf("%d", rand.Intn(c.config.RandomizeCronMinuteInterval))
+				cronSpec = strings.Join(cs, " ")
+				c.log.WithFields(
+					logrus.Fields{"programID": se.ProgramID, "teamID": se.TeamID, "originalCron": se.CronSpec, "newCron": cronSpec},
+				).Info("program cron schedule minute has been randomized")
+			}
+		}
+		s, err := cron.ParseStandard(cronSpec)
 		if err != nil {
 			// Abort start
 			// TODO: skip this entry and continue?

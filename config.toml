@@ -11,3 +11,5 @@ enable-teams-whitelist-scan = $ENABLE_TEAMS_WHITELIST_SCAN
 teams-whitelist-scan = $TEAMS_WHITELIST_SCAN
 enable-teams-whitelist-report = $ENABLE_TEAMS_WHITELIST_REPORT
 teams-whitelist-report = $TEAMS_WHITELIST_REPORT
+randomize-global-program-cron-minute = $RANDOMIZE_GLOBAL_PROGRAM_CRON_MINUTE
+randomize-cron-minute-interval = $RANDOMIZE_CRON_MINUTE_INTERVAL

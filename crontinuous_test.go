@@ -332,6 +332,146 @@ func TestExecutesEntries(t *testing.T) {
 	}
 }
 
+func TestCrontinuous_RandomizedGlobalProgramCron(t *testing.T) {
+	type fields struct {
+		config          Config
+		scanCreator     ScanCreator
+		scanCronStore   ScanCronStore
+		reportSender    ReportSender
+		reportCronStore ReportCronStore
+	}
+
+	testCases := []struct {
+		name                   string
+		fields                 fields
+		expectedCronSpect      string
+		expectedRandomizedCron bool
+	}{
+		{
+			name: "Should not randomize custom program",
+			fields: fields{
+				config: Config{
+					RandomizeGlobalProgramCronMinute: true,
+				},
+				scanCronStore: &mockCronStore{
+					scanEntries: map[string]ScanEntry{
+						"progID": {
+							ProgramID: "program@custom",
+							TeamID:    "teamID",
+							CronSpec:  "0 10 * * *",
+						},
+					},
+				},
+				reportCronStore: &mockCronStore{
+					reportEntries: map[string]ReportEntry{},
+				},
+			},
+			expectedCronSpect: "0 10 * * *",
+		},
+		{
+			name: "Should randomize global program",
+			fields: fields{
+				config: Config{
+					RandomizeGlobalProgramCronMinute: true,
+				},
+				scanCronStore: &mockCronStore{
+					scanEntries: map[string]ScanEntry{
+						"progID": {
+							ProgramID: "program@periodic-full-scan",
+							TeamID:    "teamID",
+							CronSpec:  "0 8 * * *",
+						},
+					},
+				},
+				reportCronStore: &mockCronStore{
+					reportEntries: map[string]ReportEntry{},
+				},
+			},
+			expectedRandomizedCron: true,
+		},
+		{
+			name: "Should not randomize global program",
+			fields: fields{
+				config: Config{
+					RandomizeGlobalProgramCronMinute: false,
+				},
+				scanCronStore: &mockCronStore{
+					scanEntries: map[string]ScanEntry{
+						"progID": {
+							ProgramID: "program@periodic-full-scan",
+							TeamID:    "teamID",
+							CronSpec:  "0 8 * * *",
+						},
+					},
+				},
+				reportCronStore: &mockCronStore{
+					reportEntries: map[string]ReportEntry{},
+				},
+			},
+			expectedCronSpect: "0 8 * * *",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(*testing.T) {
+			c := NewCrontinuous(tc.fields.config, logrus.New(),
+				tc.fields.scanCreator, tc.fields.scanCronStore,
+				tc.fields.reportSender, tc.fields.reportCronStore)
+
+			// Scan Entries
+			scanEntries, _, err := c.buildScanEntries()
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+			diff := cmp.Diff(scanEntries["progID"].CronSpec, tc.expectedCronSpect)
+			if !tc.expectedRandomizedCron && diff != "" {
+				t.Fatalf("scan entries got!=want, diff %s", diff)
+			}
+		})
+	}
+}
+
+func TestCrontinuous_isGlobalProgram(t *testing.T) {
+	tests := []struct {
+		name      string
+		programID string
+		want      bool
+	}{
+		{
+			name:      "Web Scanning Global Program",
+			programID: "program@web-scanning",
+			want:      true,
+		},
+		{
+			name:      "Redcon Global Program",
+			programID: "program@redcon-scan",
+			want:      true,
+		},
+		{
+			name:      "Periodic Full Global Program",
+			programID: "program@periodic-full-scan",
+			want:      true,
+		},
+		{
+			name:      "CP Global Program",
+			programID: "program@cp-scan",
+			want:      true,
+		},
+		{
+			name:      "Custom Program",
+			programID: "program@custom",
+			want:      false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isGlobalProgram(tt.programID)
+			if got != tt.want {
+				t.Fatalf("unexpected isGlobalProgram response. Got: %t Want: %t", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCrontinuous_GetEntries(t *testing.T) {
 	tests := []struct {
 		name              string
