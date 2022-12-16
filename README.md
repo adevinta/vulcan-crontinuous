@@ -184,7 +184,7 @@ Those are the variables you have to use:
 |TEAMS_WHITELIST_SCAN|List of whitelisted team IDs for scan scheduling|[]|
 |ENABLE_TEAMS_WHITELIST_REPORT|Flag to enable whitelist on report scheduling|false|
 |TEAMS_WHITELIST_REPORT|List of whitelisted team IDs for report scheduling|[]|
-|RANDOMIZE_GLOBAL_PROGRAM_CRON_MINUTE|Randomizes the cron minute for global programs|false|
+|RANDOMIZE_CRON_MINUTE_SUFFIXES|Coma separated list of program suffixes to randomize the cron minute||
 |RANDOMIZE_CRON_MINUTE_INTERVAL|Specifies the interval range to randomize the cron minute. From 0 to 59|59|
 
 ```bash

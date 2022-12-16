@@ -4,8 +4,6 @@
 
 export PORT=${PORT:-8080}
 export PATH_STYLE=${PATH_STYLE:-false}
-export RANDOMIZE_GLOBAL_PROGRAM_CRON_MINUTE=${RANDOMIZE_GLOBAL_PROGRAM_CRON_MINUTE:-false}
-export RANDOMIZE_CRON_MINUTE_INTERVAL=${RANDOMIZE_CRON_MINUTE_INTERVAL:-0}
 
 # Apply env variables
 cat config.toml | envsubst > run.toml

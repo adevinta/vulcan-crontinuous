@@ -111,8 +111,8 @@ type config struct {
 	EnableTeamsWhitelistReport bool     `mapstructure:"enable-teams-whitelist-report"`
 	TeamsWhitelistReport       []string `mapstructure:"teams-whitelist-report"`
 
-	RandomizeGlobalProgramCronMinute bool `mapstructure:"randomize-global-program-cron-minute"`
-	RandomizeCronMinuteInterval      int  `mapstructure:"randomize-cron-minute-interval"`
+	RandomizeCronMinuteProgramSuffixes string `mapstructure:"randomize-cron-minute-suffixes"`
+	RandomizeCronMinuteInterval        int    `mapstructure:"randomize-cron-minute-interval"`
 }
 
 func runServer(c config) error {
@@ -144,8 +144,8 @@ func runServer(c config) error {
 			EnableTeamsWhitelistReport: c.EnableTeamsWhitelistReport,
 			TeamsWhitelistReport:       c.TeamsWhitelistReport,
 
-			RandomizeGlobalProgramCronMinute: c.RandomizeGlobalProgramCronMinute,
-			RandomizeCronMinuteInterval:      c.RandomizeCronMinuteInterval,
+			RandomizeCronMinuteProgramSuffixes: c.RandomizeCronMinuteProgramSuffixes,
+			RandomizeCronMinuteInterval:        c.RandomizeCronMinuteInterval,
 		},
 		logrus.New(),
 		vulcanc, s3Store,

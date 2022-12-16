@@ -48,8 +48,8 @@ type Config struct {
 	EnableTeamsWhitelistReport bool
 	TeamsWhitelistReport       []string
 
-	RandomizeGlobalProgramCronMinute bool
-	RandomizeCronMinuteInterval      int
+	RandomizeCronMinuteProgramSuffixes string
+	RandomizeCronMinuteInterval        int
 }
 
 type CronType int
@@ -94,8 +94,7 @@ func NewCrontinuous(cfg Config, logger *logrus.Logger,
 	scanCreator ScanCreator, scanCronStore ScanCronStore,
 	reportSender ReportSender, reportCronStore ReportCronStore) *Crontinuous {
 
-	if cfg.RandomizeGlobalProgramCronMinute &&
-		(cfg.RandomizeCronMinuteInterval == 0 || cfg.RandomizeCronMinuteInterval > 59) {
+	if cfg.RandomizeCronMinuteInterval < 1 || cfg.RandomizeCronMinuteInterval > 59 {
 		cfg.RandomizeCronMinuteInterval = 59
 	}
 	return &Crontinuous{
@@ -141,18 +140,12 @@ func (c *Crontinuous) Start() error {
 	return nil
 }
 
-func isGlobalProgram(programID string) bool {
-	if strings.HasSuffix(programID, "@web-scanning") {
-		return true
-	}
-	if strings.HasSuffix(programID, "@redcon-scan") {
-		return true
-	}
-	if strings.HasSuffix(programID, "@periodic-full-scan") {
-		return true
-	}
-	if strings.HasSuffix(programID, "@cp-scan") {
-		return true
+func (c *Crontinuous) isProgramSuffixIncluded(programID string) bool {
+	pss := strings.Split(c.config.RandomizeCronMinuteProgramSuffixes, ",")
+	for _, ps := range pss {
+		if strings.HasSuffix(programID, strings.TrimSpace(ps)) {
+			return true
+		}
 	}
 	return false
 }
@@ -171,7 +164,7 @@ func (c *Crontinuous) buildScanEntries() (map[string]ScanEntry, []cronJobSchedul
 			continue
 		}
 		cronSpec := se.CronSpec
-		if c.config.RandomizeGlobalProgramCronMinute && isGlobalProgram(se.ProgramID) {
+		if c.isProgramSuffixIncluded(se.ProgramID) {
 			cs := strings.Split(cronSpec, " ")
 			// Ensure that the first entry of the cron string is an integer.
 			if _, err := strconv.Atoi(cs[0]); err == nil {
