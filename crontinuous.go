@@ -140,8 +140,11 @@ func (c *Crontinuous) Start() error {
 	return nil
 }
 
-func (c *Crontinuous) isProgramSuffixIncluded(programID string) bool {
-	pss := strings.Split(c.config.RandomizeCronMinuteProgramSuffixes, ",")
+func isProgramSuffixIncluded(programID, programSuffixes string) bool {
+	pss := strings.Split(programSuffixes, ",")
+	if len(pss) == 1 && pss[0] == "" {
+		return false
+	}
 	for _, ps := range pss {
 		if strings.HasSuffix(programID, strings.TrimSpace(ps)) {
 			return true
@@ -164,7 +167,7 @@ func (c *Crontinuous) buildScanEntries() (map[string]ScanEntry, []cronJobSchedul
 			continue
 		}
 		cronSpec := se.CronSpec
-		if c.isProgramSuffixIncluded(se.ProgramID) {
+		if isProgramSuffixIncluded(se.ProgramID, c.config.RandomizeCronMinuteProgramSuffixes) {
 			cs := strings.Split(cronSpec, " ")
 			// Ensure that the first entry of the cron string is an integer.
 			if _, err := strconv.Atoi(cs[0]); err == nil {

@@ -332,6 +332,60 @@ func TestExecutesEntries(t *testing.T) {
 	}
 }
 
+func TestCrontinuous_isProgramSuffixIncluded(t *testing.T) {
+	tests := []struct {
+		name            string
+		programID       string
+		programSuffixes string
+		want            bool
+	}{
+		{
+			name:            "Empty suffixes",
+			programID:       "program@web-scanning",
+			programSuffixes: "",
+			want:            false,
+		},
+		{
+			name:            "One prefix matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@redcon-scan",
+			want:            true,
+		},
+		{
+			name:            "One prefix not matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@periodic-full-scan",
+			want:            false,
+		},
+		{
+			name:            "Two prefixes, one matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@redcon-scan,@periodic-full-scan",
+			want:            true,
+		},
+		{
+			name:            "Two prefixes, one matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@redcon-scan,@periodic-full-scan",
+			want:            true,
+		},
+		{
+			name:            "Two prefixes, none matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@cp-scan,@periodic-full-scan",
+			want:            false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isProgramSuffixIncluded(tt.programID, tt.programSuffixes)
+			if got != tt.want {
+				t.Fatalf("unexpected isProgramSuffixIncluded response. Got: %t Want: %t", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCrontinuous_RandomizedGlobalProgramCron(t *testing.T) {
 	type fields struct {
 		config          Config
