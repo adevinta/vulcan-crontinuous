@@ -364,12 +364,6 @@ func TestCrontinuous_isProgramSuffixIncluded(t *testing.T) {
 			want:            true,
 		},
 		{
-			name:            "Two prefixes, one matching",
-			programID:       "program@redcon-scan",
-			programSuffixes: "@redcon-scan,@periodic-full-scan",
-			want:            true,
-		},
-		{
 			name:            "Two prefixes, none matching",
 			programID:       "program@redcon-scan",
 			programSuffixes: "@cp-scan,@periodic-full-scan",

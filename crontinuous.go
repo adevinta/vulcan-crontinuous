@@ -17,6 +17,8 @@ import (
 )
 
 const (
+	MaxRandomizeCronMinuteInterval int = 59
+
 	ScanCronType CronType = iota
 	ReportCronType
 )
@@ -94,8 +96,9 @@ func NewCrontinuous(cfg Config, logger *logrus.Logger,
 	scanCreator ScanCreator, scanCronStore ScanCronStore,
 	reportSender ReportSender, reportCronStore ReportCronStore) *Crontinuous {
 
-	if cfg.RandomizeCronMinuteInterval < 1 || cfg.RandomizeCronMinuteInterval > 59 {
-		cfg.RandomizeCronMinuteInterval = 59
+	if cfg.RandomizeCronMinuteInterval < 1 || cfg.RandomizeCronMinuteInterval > MaxRandomizeCronMinuteInterval {
+		logger.Infof("changing randomize-cron-minute-interval from [%d] to [%d]", cfg.RandomizeCronMinuteInterval, MaxRandomizeCronMinuteInterval)
+		cfg.RandomizeCronMinuteInterval = MaxRandomizeCronMinuteInterval
 	}
 	return &Crontinuous{
 		config:          cfg,
