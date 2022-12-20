@@ -6,6 +6,10 @@ package crontinuous
 
 import (
 	"errors"
+	"fmt"
+	"math/rand"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/manelmontilla/cron"
@@ -13,6 +17,8 @@ import (
 )
 
 const (
+	MaxRandomizeCronMinuteInterval int = 59
+
 	ScanCronType CronType = iota
 	ReportCronType
 )
@@ -43,6 +49,9 @@ type Config struct {
 	TeamsWhitelistScan         []string
 	EnableTeamsWhitelistReport bool
 	TeamsWhitelistReport       []string
+
+	RandomizeCronMinuteProgramSuffixes string
+	RandomizeCronMinuteInterval        int
 }
 
 type CronType int
@@ -87,6 +96,10 @@ func NewCrontinuous(cfg Config, logger *logrus.Logger,
 	scanCreator ScanCreator, scanCronStore ScanCronStore,
 	reportSender ReportSender, reportCronStore ReportCronStore) *Crontinuous {
 
+	if cfg.RandomizeCronMinuteInterval < 1 || cfg.RandomizeCronMinuteInterval > MaxRandomizeCronMinuteInterval {
+		logger.Infof("changing randomize-cron-minute-interval from [%d] to [%d]", cfg.RandomizeCronMinuteInterval, MaxRandomizeCronMinuteInterval)
+		cfg.RandomizeCronMinuteInterval = MaxRandomizeCronMinuteInterval
+	}
 	return &Crontinuous{
 		config:          cfg,
 		log:             logger,
@@ -130,6 +143,19 @@ func (c *Crontinuous) Start() error {
 	return nil
 }
 
+func isProgramSuffixIncluded(programID, programSuffixes string) bool {
+	pss := strings.Split(programSuffixes, ",")
+	if len(pss) == 1 && pss[0] == "" {
+		return false
+	}
+	for _, ps := range pss {
+		if strings.HasSuffix(programID, strings.TrimSpace(ps)) {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *Crontinuous) buildScanEntries() (map[string]ScanEntry, []cronJobSchedule, error) {
 	scanEntries, err := c.scanCronStore.GetScanEntries()
 	if err != nil {
@@ -143,7 +169,19 @@ func (c *Crontinuous) buildScanEntries() (map[string]ScanEntry, []cronJobSchedul
 			// but do not build job to be scheduled.
 			continue
 		}
-		s, err := cron.ParseStandard(se.CronSpec)
+		cronSpec := se.CronSpec
+		if isProgramSuffixIncluded(se.ProgramID, c.config.RandomizeCronMinuteProgramSuffixes) {
+			cs := strings.Split(cronSpec, " ")
+			// Ensure that the first entry of the cron string is an integer.
+			if _, err := strconv.Atoi(cs[0]); err == nil {
+				cs[0] = fmt.Sprintf("%d", rand.Intn(c.config.RandomizeCronMinuteInterval))
+				cronSpec = strings.Join(cs, " ")
+				c.log.WithFields(
+					logrus.Fields{"programID": se.ProgramID, "teamID": se.TeamID, "originalCron": se.CronSpec, "newCron": cronSpec},
+				).Info("program cron schedule minute has been randomized")
+			}
+		}
+		s, err := cron.ParseStandard(cronSpec)
 		if err != nil {
 			// Abort start
 			// TODO: skip this entry and continue?

@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -111,7 +111,7 @@ func (s *S3CronStore) getEntriesData(key string) ([]byte, error) {
 		return nil, err
 	}
 
-	return ioutil.ReadAll(output.Body)
+	return io.ReadAll(output.Body)
 }
 
 func (s *S3CronStore) saveEntries(key string, entries interface{}) error {

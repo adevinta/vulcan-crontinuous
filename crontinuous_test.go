@@ -332,6 +332,131 @@ func TestExecutesEntries(t *testing.T) {
 	}
 }
 
+func TestCrontinuous_isProgramSuffixIncluded(t *testing.T) {
+	tests := []struct {
+		name            string
+		programID       string
+		programSuffixes string
+		want            bool
+	}{
+		{
+			name:            "Empty suffixes",
+			programID:       "program@web-scanning",
+			programSuffixes: "",
+			want:            false,
+		},
+		{
+			name:            "One prefix matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@redcon-scan",
+			want:            true,
+		},
+		{
+			name:            "One prefix not matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@periodic-full-scan",
+			want:            false,
+		},
+		{
+			name:            "Two prefixes, one matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@redcon-scan,@periodic-full-scan",
+			want:            true,
+		},
+		{
+			name:            "Two prefixes, none matching",
+			programID:       "program@redcon-scan",
+			programSuffixes: "@cp-scan,@periodic-full-scan",
+			want:            false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isProgramSuffixIncluded(tt.programID, tt.programSuffixes)
+			if got != tt.want {
+				t.Fatalf("unexpected isProgramSuffixIncluded response. Got: %t Want: %t", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCrontinuous_RandomizedGlobalProgramCron(t *testing.T) {
+	type fields struct {
+		config          Config
+		scanCreator     ScanCreator
+		scanCronStore   ScanCronStore
+		reportSender    ReportSender
+		reportCronStore ReportCronStore
+	}
+
+	testCases := []struct {
+		name                   string
+		fields                 fields
+		expectedCronSpect      string
+		expectedRandomizedCron bool
+	}{
+		{
+			name: "Should not randomize program minute",
+			fields: fields{
+				config: Config{
+					RandomizeCronMinuteProgramSuffixes: "@periodic-full-scan,@cp-scan",
+				},
+				scanCronStore: &mockCronStore{
+					scanEntries: map[string]ScanEntry{
+						"progID": {
+							ProgramID: "program@custom",
+							TeamID:    "teamID",
+							CronSpec:  "0 10 * * *",
+						},
+					},
+				},
+				reportCronStore: &mockCronStore{
+					reportEntries: map[string]ReportEntry{},
+				},
+			},
+			expectedCronSpect: "0 10 * * *",
+		},
+		{
+			name: "Should randomize program minute",
+			fields: fields{
+				config: Config{
+					RandomizeCronMinuteProgramSuffixes: "@periodic-full-scan,@cp-scan",
+				},
+				scanCronStore: &mockCronStore{
+					scanEntries: map[string]ScanEntry{
+						"progID": {
+							ProgramID: "program@periodic-full-scan",
+							TeamID:    "teamID",
+							CronSpec:  "0 8 * * *",
+						},
+					},
+				},
+				reportCronStore: &mockCronStore{
+					reportEntries: map[string]ReportEntry{},
+				},
+			},
+			expectedRandomizedCron: true,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(*testing.T) {
+			c := NewCrontinuous(tc.fields.config, logrus.New(),
+				tc.fields.scanCreator, tc.fields.scanCronStore,
+				tc.fields.reportSender, tc.fields.reportCronStore)
+
+			// Scan Entries
+			scanEntries, _, err := c.buildScanEntries()
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+			diff := cmp.Diff(scanEntries["progID"].CronSpec, tc.expectedCronSpect)
+			if !tc.expectedRandomizedCron && diff != "" {
+				t.Fatalf("scan entries got!=want, diff %s", diff)
+			}
+		})
+	}
+}
+
 func TestCrontinuous_GetEntries(t *testing.T) {
 	tests := []struct {
 		name              string

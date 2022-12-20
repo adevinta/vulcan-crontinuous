@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -100,11 +100,11 @@ func (c *VulcanClient) performReq(httpMethod, url string, payload interface{}) e
 
 	if resp.StatusCode != http.StatusCreated {
 		var content string
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err == nil {
 			content = string(b)
 		}
-		err = fmt.Errorf("Error. Response status %s. Content: %s", resp.Status, content)
+		err = fmt.Errorf("response status %s. Content: %s", resp.Status, content)
 		if resp.StatusCode >= 500 {
 			// If HTTP communication was successful
 			// but an error was produced in the server,

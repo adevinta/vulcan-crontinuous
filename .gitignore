@@ -6,3 +6,7 @@
 *.pyc
 
 vendor/
+
+.vscode
+run.toml
+__debug_bin

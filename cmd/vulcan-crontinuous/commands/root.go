@@ -110,6 +110,9 @@ type config struct {
 	TeamsWhitelistScan         []string `mapstructure:"teams-whitelist-scan"`
 	EnableTeamsWhitelistReport bool     `mapstructure:"enable-teams-whitelist-report"`
 	TeamsWhitelistReport       []string `mapstructure:"teams-whitelist-report"`
+
+	RandomizeCronMinuteProgramSuffixes string `mapstructure:"randomize-cron-minute-suffixes"`
+	RandomizeCronMinuteInterval        int    `mapstructure:"randomize-cron-minute-interval"`
 }
 
 func runServer(c config) error {
@@ -142,6 +145,9 @@ func runServer(c config) error {
 			TeamsWhitelistScan:         c.TeamsWhitelistScan,
 			EnableTeamsWhitelistReport: c.EnableTeamsWhitelistReport,
 			TeamsWhitelistReport:       c.TeamsWhitelistReport,
+
+			RandomizeCronMinuteProgramSuffixes: c.RandomizeCronMinuteProgramSuffixes,
+			RandomizeCronMinuteInterval:        c.RandomizeCronMinuteInterval,
 		},
 		logger,
 		vulcanc, s3Store,
