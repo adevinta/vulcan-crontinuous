@@ -3,7 +3,7 @@ module github.com/adevinta/vulcan-crontinuous
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go v1.44.29
+	github.com/aws/aws-sdk-go v1.44.330
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/google/go-cmp v0.2.0
 	github.com/julienschmidt/httprouter v1.1.0
