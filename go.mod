@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.45.10
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/google/go-cmp v0.2.0
-	github.com/julienschmidt/httprouter v1.1.0
+	github.com/julienschmidt/httprouter v1.3.0
 	github.com/manelmontilla/cron v0.0.0-20190227162100-b5ca48f98911
 	github.com/mitchellh/go-homedir v0.0.0-20161203194507-b8bc1bf76747
 	github.com/sirupsen/logrus v1.8.1
