@@ -3,7 +3,7 @@ module github.com/adevinta/vulcan-crontinuous
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go v1.47.0
+	github.com/aws/aws-sdk-go v1.48.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/google/go-cmp v0.6.0
 	github.com/julienschmidt/httprouter v1.3.0
@@ -29,7 +29,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
