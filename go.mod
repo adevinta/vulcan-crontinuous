@@ -1,6 +1,8 @@
 module github.com/adevinta/vulcan-crontinuous
 
-go 1.18
+go 1.21.0
+
+toolchain go1.21.6
 
 require (
 	github.com/aws/aws-sdk-go v1.50.0
