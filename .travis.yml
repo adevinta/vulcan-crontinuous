@@ -3,11 +3,7 @@ language: go
 services:
   - docker
 go:
-  - 1.18.x
-env:
-  global:
-    - CGO_ENABLED=0
-    - GO111MODULE=on
+  - 1.21.x
 gobuild_args: -a -tags netgo -ldflags '-w'
 go_import_path: github.com/adevinta/vulcan-crontinuous
 script:
