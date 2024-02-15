@@ -1,12 +1,12 @@
 # Copyright 2020 Adevinta
 
-FROM golang:1.22-alpine3.18 as builder
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine3.19 as builder
 
 WORKDIR /app
 
 ENV CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+    GOOS=$TARGETOS \
+    GOARCH=$TARGETARCH
 
 COPY go.mod .
 COPY go.sum .
