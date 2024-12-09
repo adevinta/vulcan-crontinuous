@@ -16,7 +16,7 @@ COPY . .
 
 RUN go build -o vulcan-crontinuous -a -tags netgo -ldflags '-w' cmd/vulcan-crontinuous/main.go
 
-FROM alpine:3.20
+FROM alpine:3.21
 
 RUN apk add --no-cache --update gettext
 
