@@ -81,7 +81,7 @@ func TestVulcanClient_CreateScan(t *testing.T) {
 				t.Errorf("VulcanClient.CreateScan() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if diff != "" {
-				t.Errorf(diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -134,7 +134,7 @@ func TestVulcanClient_SendReport(t *testing.T) {
 				t.Errorf("VulcanClient.SendReport() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if diff != "" {
-				t.Errorf(diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -199,7 +199,7 @@ func TestVulcanClient_TestBackoff(t *testing.T) {
 				t.Errorf("VulcanClient.SendReport() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if diff != "" {
-				t.Errorf(diff)
+				t.Error(diff)
 			}
 		})
 	}
