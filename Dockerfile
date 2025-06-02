@@ -14,7 +14,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -a -tags netgo -ldflags '-w' ./cmd/vulcan-crontinuous
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 RUN apk add --no-cache --update gettext
 
